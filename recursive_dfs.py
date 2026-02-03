@@ -1,12 +1,13 @@
 from random import shuffle, randrange
 from typing import List, Dict, Set, Tuple
-
+import time
 
 class Cell:
     def __init__(self) -> None:
         self.visited: bool = False
         self.walls: Dict[str, bool] = {"N": True, "E": True, "S": True, "W": True}
-
+    def __repr__(self):
+        return f"{self.walls}"
 
 class MazeGenerator:
     def __init__(self, width: int, height: int) -> None:
@@ -22,11 +23,11 @@ class MazeGenerator:
 
         # Original 42 pattern (13x5)
         orig_pattern = [
-            [1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0],
-            [1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-            [1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
             [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0]
+            [0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0]
         ]
 
         # Check if maze is large enough for 42
@@ -79,7 +80,7 @@ class MazeGenerator:
             ("S", x, y + 1),
             ("W", x - 1, y),
         ]
-        shuffle(directions)
+        # shuffle(directions)
 
         for direction, nx, ny in directions:
             if not self._in_bounds(nx, ny):
@@ -105,8 +106,8 @@ class MazeGenerator:
 
     def display_ascii(self) -> None:
         # Top border
-        print("+" + "---+" * self.width)
-
+        print("+" + "---+" * self.width, flush=True)
+        # time.sleep(1)
         for y in range(self.height):
             # Vertical walls / cells
             line = "|"
@@ -123,7 +124,8 @@ class MazeGenerator:
                     line += "|"
                 else:
                     line += " "
-            print(line)
+            print(line, flush=True)
+            # time.sleep(1)
 
             # Horizontal walls
             line = "+"
@@ -132,12 +134,14 @@ class MazeGenerator:
                     line += "---+"
                 else:
                     line += "   +"
-            print(line)
+            print(line, flush=True)
+            # time.sleep(1)
 
 
 # ---------- MAIN ----------
 
 if __name__ == "__main__":
-    mg = MazeGenerator(10, 10)  # Works for small mazes
+    mg = MazeGenerator(15, 15)  # Works for small mazes
     mg.generate()
     mg.display_ascii()
+    # print(mg.maze)

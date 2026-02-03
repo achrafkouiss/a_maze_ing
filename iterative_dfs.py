@@ -1,6 +1,6 @@
 from random import shuffle, randrange
 from typing import List, Dict, Set, Tuple
-
+import time
 
 class Cell:
     def __init__(self) -> None:
@@ -20,13 +20,22 @@ class MazeGenerator:
         ]
 
         # Original 42 pattern (13x5)
+        # self.orig_pattern = [
+        #     [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+        #     [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        #     [0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0],
+        #     [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0]
+        # ]
+
         self.orig_pattern = [
-            [1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0],
-            [1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-            [1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0]
+            [0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+            [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+            [0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+            [0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0]
         ]
+
 
         # Check if maze is large enough for 42
         if width < 7 or height < 5:
@@ -62,58 +71,100 @@ class MazeGenerator:
             start_y = randrange(self.height)
 
         stack = [(start_x, start_y)]
+        # print(stack)
 
         while stack:
             x, y = stack[-1]
+            # print(x, y)
+            # print(stack)
             cell = self.maze[y][x]
             cell.visited = True
 
             # Find unvisited neighbors outside 42
             neighbors = []
-            directions = [("N", x, y - 1), ("E", x + 1, y), ("S", x, y + 1), ("W", x - 1, y)]
+            directions = [
+                ("N", x, y - 1),
+                ("E", x + 1, y),
+                ("S", x, y + 1),
+                ("W", x - 1, y)
+                ]
             for direction, nx, ny in directions:
                 if self._in_bounds(nx, ny) and (nx, ny) not in self.pattern_cells and not self.maze[ny][nx].visited:
                     neighbors.append((direction, nx, ny))
+            
+            # print(neighbors)
 
             if neighbors:
                 direction, nx, ny = neighbors[randrange(len(neighbors))]
+                # print(direction, nx, ny)
+                # print("*" * 20)
                 self._remove_wall(cell, self.maze[ny][nx], direction)
                 stack.append((nx, ny))
             else:
                 # backtrack
                 stack.pop()
+                # print(stack)
 
     def _remove_wall(self, c1: Cell, c2: Cell, direction: str) -> None:
         opposite = {"N": "S", "S": "N", "E": "W", "W": "E"}
-        c1.walls[direction] = False
+        c1.walls[direction] = False 
         c2.walls[opposite[direction]] = False
 
     def _in_bounds(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
 
     # ---------- ASCII DISPLAY ----------
-
     def display_ascii(self) -> None:
-        print("+" + "---+" * self.width)
+        RED_BG = "\033[41m"
+        RESET = "\033[0m"
+        WALL = chr(9608)
+        print(WALL + WALL * 4 * self.width)
+        # time.sleep(1)
         for y in range(self.height):
-            line = "|"
+            line = WALL
             for x in range(self.width):
                 cell = self.maze[y][x]
-                if (x, y) in self.pattern_cells:
-                    line += "###"
-                elif all(cell.walls.values()):
-                    line += "###"
+                if all(cell.walls.values()):
+                    line += RED_BG + " " * 3 + RESET
                 else:
                     line += "   "
-                line += "|" if cell.walls["E"] else " "
+                line += WALL if cell.walls["E"] else " "
             print(line)
-            line = "+"
+            # time.sleep(1)
+            line = WALL
             for x in range(self.width):
                 cell = self.maze[y][x]
-                line += "---+" if (x, y) in self.pattern_cells or cell.walls["S"] else "   +"
+                line += WALL * 4 if (x, y) in self.pattern_cells or cell.walls["S"] else f"   {WALL}"
             print(line)
 
-# ---------- MAIN ----------
+    # def display_ascii(self) -> None:
+    #     RED_BG = "\033[41m"
+    #     RESET = "\033[0m"
+    #     WALL = chr(9608)
+    #     print(WALL + WALL * 4 * self.width)
+    #     # time.sleep(1)
+    #     for y in range(self.height):
+    #         print(WALL, end="")
+    #         for x in range(self.width):
+    #             cell = self.maze[y][x]
+    #             if all(cell.walls.values()):
+    #                 print(RED_BG + " " * 3 + RESET, end="")
+    #                 # line += RED_BG + " " * 3 + RESET
+    #             else:
+    #                 print("   ",end="")
+    #                 # line += "   "
+    #             print(WALL if cell.walls["E"] else " ", end="")
+    #             # line += WALL if cell.walls["E"] else " "
+    #         # print(line)
+    #         # time.sleep(1)
+    #         print(WALL)
+    #         # line = WALL
+    #         for x in range(self.width):
+    #             cell = self.maze[y][x]
+    #             # line += WALL * 4 if (x, y) in self.pattern_cells or cell.walls["S"] else f"   {WALL}"
+    #             print(WALL * 4 if (x, y) in self.pattern_cells or cell.walls["S"] else f"   {WALL}", end="")
+    #         # print(line)
+# # ---------- MAIN ----------
 
 if __name__ == "__main__":
     mg = MazeGenerator(15, 15)
