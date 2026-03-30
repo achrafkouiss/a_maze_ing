@@ -23,10 +23,10 @@ class MazeSolver:
         }
 
         directions: List[Direction] = [
-            ("N", 0, -1),
-            ("S", 0, 1),
-            ("E", 1, 0),
-            ("W", -1, 0),
+            (N, 0, -1),
+            (S, 0, 1),
+            (E, 1, 0),
+            (W, -1, 0),
         ]
 
         while queue:
@@ -38,15 +38,13 @@ class MazeSolver:
             for d, dx, dy in directions:
                 nx, ny = x + dx, y + dy
 
-                if not self.mg._in_bounds(nx, ny):
+                if (
+                    not self.mg._in_bounds(nx, ny) or 
+                    (nx, ny) in visited or
+                    self.mg.maze[y][x].walls & d or
+                    (nx, ny) in self.mg.pattern_cells
+                ):
                     continue
-                if (nx, ny) in visited:
-                    continue
-                if self.mg.maze[y][x].walls & self._dir_to_bit(d):
-                    continue
-                if (nx, ny) in self.mg.pattern_cells:
-                    continue
-
                 visited.add((nx, ny))
                 parent[(nx, ny)] = (x, y)
                 queue.append((nx, ny))
@@ -66,12 +64,3 @@ class MazeSolver:
             cur = parent[cur]
 
         return path[::-1]
-
-    def _dir_to_bit(self, d: str) -> int:
-        if d == "N":
-            return N
-        if d == "E":
-            return E
-        if d == "S":
-            return S
-        return W

@@ -17,7 +17,7 @@ def main() -> None:
     config = parse_config_file(config_file)  # <- use this
 
     # print(config)
-     # ✅ Apply seed ONLY if provided
+     # Apply seed ONLY if provided
     if config.seed is not None:
         random.seed(config.seed)
     else:
@@ -29,13 +29,12 @@ def main() -> None:
         entry=config.entry,
         exit=config.exit,
         perfect=config.perfect,
-        color=config.color
     )
 
     mg.dfs_generator()
     display_ascii_real(mg)
     # print_maze_debug(mg)
-    main_menu(mg)
+    main_menu(mg, config.output_file)
 
 if __name__ == "__main__":
     main()

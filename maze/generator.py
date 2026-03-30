@@ -18,7 +18,6 @@ class MazeGenerator:
         entry: Tuple[int, int],
         exit: Tuple[int, int],
         perfect: bool,
-        color: str = "white",
     ) -> None:
 
         if width <= 0 or height <= 0:
@@ -32,7 +31,7 @@ class MazeGenerator:
         self.entry = entry
         self.exit = exit
 
-        self.color = color
+        self.color = "white"
         self.perfect = perfect
         self._init_maze()
         self._42_pattern()

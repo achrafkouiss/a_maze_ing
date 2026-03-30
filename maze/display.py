@@ -16,6 +16,8 @@ def display_ascii_real(
     VWALL = ansi_colors[mg.color] + "  " + RESET
     HWALL = ansi_colors[mg.color] + "   " + RESET
     SPACE = " " * 3
+    RED = "\033[41m"
+    CRYAN = "\033[46m"
 
     ENTRY = "EEE"
     EXIT = "XXX"
@@ -32,11 +34,11 @@ def display_ascii_real(
             elif (x, y) == mg.exit:
                 line += EXIT
             elif path and (x, y) in path:
-                line += ansi_colors["cyan"] + SPACE + RESET
+                line += CRYAN + SPACE + RESET
             elif current == (x, y):
                 line += ansi_colors["green"] + SPACE + RESET
             elif (x, y) in mg.pattern_cells:
-                line += ansi_colors["red"] + SPACE + RESET
+                line += RED + SPACE + RESET
             else:
                 line += SPACE
 
@@ -44,7 +46,7 @@ def display_ascii_real(
                 line += VWALL
             else:
                 if path and (x, y) in path and (x + 1, y) in path:
-                    line += ansi_colors["cyan"] + "  " + RESET
+                    line += CRYAN + "  " + RESET
                 else:
                     line += "  "
         print(line)
@@ -57,7 +59,7 @@ def display_ascii_real(
                 line += HWALL
             else:
                 if path and (x, y) in path and (x, y + 1) in path:
-                    line += ansi_colors["cyan"] + SPACE + RESET
+                    line += CRYAN + SPACE + RESET
                 else:
                     line += SPACE
 

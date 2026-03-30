@@ -24,8 +24,8 @@ def _path_to_directions(path: list[Tuple[int, int]]) -> str:
 
 def update_output_file(
     mg: MazeGenerator,
+    output_file: str,
     path: Optional[Set[Tuple[int, int]]] = None,
-    filename: Optional[str] = None,
 ) -> None:
     """
     Writes the maze state to the output file in subject format:
@@ -37,15 +37,11 @@ def update_output_file(
     - shortest path as sequence of N/E/S/W letters
     """
 
-    if filename is None:
-        # Use MazeGenerator's configured output_file if available
-        filename = getattr(mg, "output_file", "maze_output.txt")
-
     # Solve shortest path using BFS
     solver = MazeSolver(mg)
     shortest_path = solver.solve_bfs() if path is None else list(path)
 
-    with open(filename, "w", encoding="utf-8") as f:
+    with open(output_file, "w") as f:
         # Write maze row by row in hex
         for y in range(mg.height):
             line = "".join(f"{mg.maze[y][x].walls:X}" for x in range(mg.width))

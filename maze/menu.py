@@ -26,7 +26,7 @@ def color_menu(mg: MazeGenerator) -> None:
                 time.sleep(1)
                 os.system("clear")
                 display_ascii_real(mg)
-                update_output_file(mg)  # update output after color change
+                # update_output_file(mg)  # update output after color change
             else:
                 print("Invalid color choice")
 
@@ -36,39 +36,9 @@ def color_menu(mg: MazeGenerator) -> None:
             print("Invalid input")
 
 
-def no_animation_menu(mg: MazeGenerator) -> None:
-    while True:
-        print("\n--- Sub Menu ---")
-        print("1 - DFS")
-        print("2 - PRIM")
-        print("3 - Animate")
-        print("b - Back")
-
-        sub_choice = input("> ").strip()
-
-        if sub_choice == '1':
-            mg.reset()
-            mg.dfs_generator()
-            display_ascii_real(mg)
-            update_output_file(mg)
-
-        elif sub_choice == '2':
-            mg.reset()
-            mg.prim_generator()
-            display_ascii_real(mg)
-            update_output_file(mg)
-
-        elif sub_choice == '3':
-            replay(mg)
-            update_output_file(mg)
-
-        elif sub_choice == 'b':
-            break
-        else:
-            print("Invalid choice")
 
 
-def main_menu(mg: MazeGenerator) -> None:
+def main_menu(mg: MazeGenerator, output_file: str) -> None:
     solver = MazeSolver(mg)
     show_path = False
     path = None
@@ -90,7 +60,7 @@ def main_menu(mg: MazeGenerator) -> None:
             show_path = False
             path = None
             display_ascii_real(mg)
-            update_output_file(mg)
+            update_output_file(mg, output_file)
 
         elif choice == '2':
             mg.reset()
@@ -98,11 +68,11 @@ def main_menu(mg: MazeGenerator) -> None:
             show_path = False
             path = None
             display_ascii_real(mg)
-            update_output_file(mg)
+            update_output_file(mg, output_file)
 
         elif choice == '3':
             replay(mg)
-            update_output_file(mg)
+            update_output_file(mg, output_file)
 
         elif choice == '4':
             if not show_path:

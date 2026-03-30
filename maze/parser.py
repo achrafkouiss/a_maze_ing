@@ -12,21 +12,7 @@ class MazeConfig(BaseModel):
     exit: Tuple[int, int]
     output_file: str
     perfect: bool
-    color: str = "white"
     seed: int | None = None
-
-    @field_validator("color")
-    @classmethod
-    def color_must_be_known(cls, v: str) -> str:
-        allowed_colors = [
-            "white", "red", "green",
-            "yellow", "blue", "magenta", "cyan"
-        ]
-        if v not in allowed_colors:
-            raise ValueError(
-                f"Color must be one of {allowed_colors}"
-            )
-        return v
 
     @model_validator(mode="after")
     def validate_all(self) -> Self:
@@ -69,7 +55,6 @@ def parse_config_file(path: str) -> MazeConfig:
         "EXIT",
         "OUTPUT_FILE",
         "PERFECT",
-        "COLOR",
         "SEED",
     }
 
@@ -92,12 +77,12 @@ def parse_config_file(path: str) -> MazeConfig:
             key = key.strip()
             value = value.strip()
 
-            # 🔴 Enforce strict uppercase
+            # Enforce strict uppercase
             if key != key.upper():
                 print(f"[ERROR] Key must be uppercase: '{key}'")
                 sys.exit(1)
 
-            # 🔴 Check if key is allowed
+            # Check if key is allowed
             if key not in allowed_keys:
                 print(f"[ERROR] Unknown key: {key}")
                 sys.exit(1)
@@ -114,17 +99,17 @@ def parse_config_file(path: str) -> MazeConfig:
                         raise ValueError("PERFECT must be True or False")
                     config_dict["perfect"] = value.lower() == "true"
                 elif key == "OUTPUT_FILE":
+                    if not value.endswith(".txt") or value == "config.txt":
+                        raise ValueError("OUTPUT_FILE should be a .txt and also should not be named \"config.txt\"")
                     config_dict["output_file"] = value
-                elif key == "COLOR":
-                    config_dict["color"] = value
                 elif key == "SEED":
                     config_dict["seed"] = int(value)
-                print(config_dict)
+                # print(**config_dict)
             except ValueError as e:
                 print(f"[ERROR] Invalid value for {key}: {value} ({e})")
                 sys.exit(1)
 
-    # 🔴 Check for missing mandatory keys
+    # Check for missing mandatory keys
     required_keys = {"width", "height", "entry", "exit", "output_file", "perfect"}
     missing = required_keys - config_dict.keys()
     if missing:
