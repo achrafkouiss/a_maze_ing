@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator, model_v
 from typing import Tuple
 import pathlib
 import sys
+from typing_extensions import Self
 
 
 class MazeConfig(BaseModel):
@@ -28,7 +29,7 @@ class MazeConfig(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def validate_all(self) -> "MazeConfig":
+    def validate_all(self) -> Self:
         # Entry / Exit must be inside bounds
         ex, ey = self.entry
         if not (0 <= ex < self.width and 0 <= ey < self.height):
@@ -72,9 +73,15 @@ def parse_config_file(path: str) -> MazeConfig:
         "SEED",
     }
 
-    with path_obj.open("r", encoding="utf-8") as f:
+    with open(path ,"r") as f:
+        # print(f)
+        # line = f.read()
+        # print(line)
+        # sys.exit(1)
         for line in f:
             line = line.strip()
+            # print(line)
+            # sys.exit(1)
             if not line or line.startswith("#"):
                 continue
             if "=" not in line:
@@ -103,7 +110,7 @@ def parse_config_file(path: str) -> MazeConfig:
                     x, y = map(int, value.split(","))
                     config_dict[key.lower()] = (x, y)
                 elif key == "PERFECT":
-                    if value.lower() not in ("true", "false"):
+                    if value not in ("True", "False"):
                         raise ValueError("PERFECT must be True or False")
                     config_dict["perfect"] = value.lower() == "true"
                 elif key == "OUTPUT_FILE":
@@ -112,6 +119,7 @@ def parse_config_file(path: str) -> MazeConfig:
                     config_dict["color"] = value
                 elif key == "SEED":
                     config_dict["seed"] = int(value)
+                print(config_dict)
             except ValueError as e:
                 print(f"[ERROR] Invalid value for {key}: {value} ({e})")
                 sys.exit(1)

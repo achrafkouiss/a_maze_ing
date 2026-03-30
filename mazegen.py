@@ -5,6 +5,8 @@ from maze.display import display_ascii_real
 from maze.menu import main_menu
 import random
 
+from maze.debuger import print_maze_debug
+
 def main() -> None:
     import sys
     if len(sys.argv) != 2:
@@ -14,6 +16,7 @@ def main() -> None:
     config_file = sys.argv[1]
     config = parse_config_file(config_file)  # <- use this
 
+    # print(config)
      # ✅ Apply seed ONLY if provided
     if config.seed is not None:
         random.seed(config.seed)
@@ -31,6 +34,7 @@ def main() -> None:
 
     mg.dfs_generator()
     display_ascii_real(mg)
+    # print_maze_debug(mg)
     main_menu(mg)
 
 if __name__ == "__main__":

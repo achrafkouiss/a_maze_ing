@@ -75,26 +75,30 @@ def display_ascii_real(
         print(line)
 
 
-def replay(mg: MazeGenerator, delay: float = 0.08) -> None:
+def replay(mg: MazeGenerator, delay: float = 0.25) -> None:
     temp_maze: list[list[Cell]] = [
         [Cell() for _ in range(mg.width)]
         for _ in range(mg.height)
     ]
 
-    for x, y, nx, ny, d in mg.history:
-        temp_maze[y][x].walls &= ~d
-        temp_maze[ny][nx].walls &= ~OPPOSITE[d]
+    original = mg.maze
+    try:
+        for x, y, nx, ny, d in mg.history:
+            temp_maze[y][x].walls &= ~d
+            temp_maze[ny][nx].walls &= ~OPPOSITE[d]
+
+            os.system("clear")
+
+            mg.maze = temp_maze
+
+            display_ascii_real(mg, current=(nx, ny))
+
+
+            time.sleep(delay)
 
         os.system("clear")
-
-        original = mg.maze
-        mg.maze = temp_maze
-
-        display_ascii_real(mg, current=(nx, ny))
-
+        display_ascii_real(mg)
+    except KeyboardInterrupt:
         mg.maze = original
+        print("\nAnimation interrupted")
 
-        time.sleep(delay)
-
-    os.system("clear")
-    display_ascii_real(mg)

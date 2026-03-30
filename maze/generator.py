@@ -35,7 +35,7 @@ class MazeGenerator:
         self.color = color
         self.perfect = perfect
         self._init_maze()
-        self._init_pattern()
+        self._42_pattern()
 
         if entry in self.pattern_cells or exit in self.pattern_cells:
             raise ValueError("Entry or exit inside pattern")
@@ -48,32 +48,33 @@ class MazeGenerator:
             for _ in range(self.height)
         ]
 
-    def _init_pattern(self) -> None:
-        self.orig_pattern = [
-            [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0],
+    def _42_pattern(self) -> None:
+        self.pattern = [
+            [1, 0, 0, 0, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 1, 1],
+            [0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 1, 0, 1, 1, 1],
         ]
 
         self.pattern_cells: Set[Tuple[int, int]] = set()
 
         if self.width >= 9 and self.height >= 7:
-            scale_x = 1
-            scale_y = 1
-
-            base_x = (self.width - round(13 * scale_x)) / 2
-            base_y = (self.height - round(5 * scale_y)) / 2
+            base_x = (self.width - 7) // 2
+            base_y = (self.height - 5) // 2
+            # print(base_x)
+            # print
 
             for oy in range(5):
-                for ox in range(13):
-                    if self.orig_pattern[oy][ox] == 1:
-                        mx = int(base_x + round(ox * scale_x))
-                        my = int(base_y + round(oy * scale_y))
+                for ox in range(7):
+                    if self.pattern[oy][ox] == 1:
+                        mx = base_x + ox
+                        my = base_y + oy
 
                         if 0 <= mx < self.width and 0 <= my < self.height:
                             self.pattern_cells.add((mx, my))
+        else:
+            print ("with should be atleast 9 and for the with atleast 7 for the pattern to be drawn")
 
     def reset(self) -> None:
         self._init_maze()
@@ -129,7 +130,7 @@ class MazeGenerator:
                 if (x, y) in self.pattern_cells:
                     continue
 
-                for d, nx, ny in [(N, x, y - 1), (E, x + 1, y)]:
+                for d, nx, ny in [(S, x, y + 1), (E, x + 1, y)]:
                     if (
                         self._in_bounds(nx, ny)
                         and (nx, ny) not in self.pattern_cells
@@ -137,7 +138,8 @@ class MazeGenerator:
                     ):
                         candidates.append((x, y, d, nx, ny))
 
-        loops = 7
+        loops = len(candidates) // 20
+        print(loops)
         added = 0
 
         while added < loops and candidates:
@@ -146,8 +148,8 @@ class MazeGenerator:
 
             cell1_walls = sum(bool(self.maze[y][x].walls & w) for w in [N, E, S, W])
             cell2_walls = sum(bool(self.maze[ny][nx].walls & w) for w in [N, E, S, W])
-
-            if cell1_walls > 1 and cell2_walls > 1:
+            
+            if cell1_walls >= 2 and cell2_walls >= 2:
                 self._remove_wall(self.maze[y][x], self.maze[ny][nx], d)
                 self.history.append((x, y, nx, ny, d))
                 added += 1
@@ -159,36 +161,33 @@ class MazeGenerator:
 
             self.maze[self.entry[1]][self.entry[0]].visited = True
 
-            neighbors: list[tuple[int, int, int]] = []
-            neighbor_coords: set[tuple[int, int]] = set()
+            neighbors: list[tuple[int, int]] = []
 
             x, y = self.entry
 
             def add_neighbors(x: int, y: int) -> None:
-                for d, nx, ny in [
-                    (N, x, y - 1),
-                    (E, x + 1, y),
-                    (S, x, y + 1),
-                    (W, x - 1, y),
+                for nx, ny in [
+                    (x, y - 1),
+                    (x + 1, y),
+                    (x, y + 1),
+                    (x - 1, y),
                 ]:
                     if (
                         self._in_bounds(nx, ny)
                         and (nx, ny) not in self.pattern_cells
                         and not self.maze[ny][nx].visited
-                        and (nx, ny) not in neighbor_coords
+                        and (nx, ny) not in neighbors
                     ):
-                        neighbors.append((d, nx, ny))
-                        neighbor_coords.add((nx, ny))
+                        neighbors.append((nx, ny))
 
             add_neighbors(x, y)
 
             while neighbors:
                 index = randrange(len(neighbors))
-                d, nx, ny = neighbors.pop(index)
-                neighbor_coords.remove((nx, ny))
+                nx, ny = neighbors.pop(index)
 
                 real_neighbors = []
-                for d2, nnx, nny in [
+                for d, nnx, nny in [
                     (N, nx, ny - 1),
                     (E, nx + 1, ny),
                     (S, nx, ny + 1),
@@ -199,15 +198,15 @@ class MazeGenerator:
                         and (nnx, nny) not in self.pattern_cells
                         and self.maze[nny][nnx].visited
                     ):
-                        real_neighbors.append((d2, nnx, nny))
+                        real_neighbors.append((d, nnx, nny))
 
                 if real_neighbors:
-                    d2, px, py = real_neighbors[randrange(len(real_neighbors))]
+                    d, px, py = real_neighbors[randrange(len(real_neighbors))]
 
-                    self._remove_wall(self.maze[ny][nx], self.maze[py][px], d2)
+                    self._remove_wall(self.maze[ny][nx], self.maze[py][px], d)
 
                     # ✅ FIXED history (same format as DFS)
-                    self.history.append((px, py, nx, ny, OPPOSITE[d2]))
+                    self.history.append((px, py, nx, ny, OPPOSITE[d]))
 
                 self.maze[ny][nx].visited = True
                 add_neighbors(nx, ny)

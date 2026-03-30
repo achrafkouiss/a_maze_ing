@@ -13,4 +13,4 @@ def print_maze_debug(mg: MazeGenerator) -> None:
                     f"{'W' if cell.walls & W else ' '}]"
                 )
             print(" ".join(row))
-        print() 
+        print()
